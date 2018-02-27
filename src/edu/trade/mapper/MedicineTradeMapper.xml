@@ -1,0 +1,351 @@
+<?xml version="1.0" encoding="UTF-8" ?> 
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+		"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="edu.trade.mapper.MedicineTradeMapper">
+
+	<!-- 实时扣款存储购药分类汇总表（LCMedBuyMain） -->
+	<insert id="addLCMedBuyMain" parameterType="body" >
+		insert into LCMedBuyMain(BatchNo,MedCardNo,MedType1,SumPayPrice,SumClmPrice,MakeDate,MakeTime,standbyflag1,standbyflag2,ClmFlag) 
+		values(
+			#{header.batchNo 				, jdbcType = VARCHAR},
+			#{basicEntity.medCardNo 		, jdbcType = VARCHAR},
+			#{realTimeTradeEntity.medType1 	, jdbcType = VARCHAR},
+			#{basicEntity.sumPrice 			, jdbcType = DOUBLE},
+			#{basicEntity.sumClmPrice 		, jdbcType = DOUBLE},
+			#{otherEntity.makeDate 			, jdbcType = DATE},
+			#{otherEntity.makeTime 			, jdbcType = VARCHAR},
+			#{basicEntity.buyDate 			, jdbcType = VARCHAR},
+			#{basicEntity.buyTime 			, jdbcType = VARCHAR},
+			'0'
+		)
+	</insert>
+	
+	<!-- 带明细的实时扣款存储药店接口日志订单地址表（LCMedAddressInfoLog） -->
+	<insert id="addLCMedAddressInfoLog" parameterType="body" >
+		insert into LCMedAddressInfoLog(SerialNo,LogSerialNo,MedCardNo,TransType,TransSerialNo,tkFlag,
+										SumPrice,SumClmPrice,BatchNo,
+										TransSerialNo7,TransSerialNo6,TransSerialNo5,TransSerialNo4,TransSerialNo3,
+										Mobile,IP,MakeDate,MakeTime) 
+		values(
+			#{otherEntity.logSerialNo 		, jdbcType = VARCHAR},
+			#{otherEntity.logSerialNo 		, jdbcType = VARCHAR},
+			#{basicEntity.medCardNo 		, jdbcType = VARCHAR},
+			#{basicEntity.buyChnl 			, jdbcType = VARCHAR},
+			#{otherEntity.logSerialNo 		, jdbcType = VARCHAR},
+			#{otherEntity.state 			, jdbcType = VARCHAR},
+			#{basicEntity.sumPrice 			, jdbcType = DOUBLE},
+			#{basicEntity.sumClmPrice		, jdbcType = DOUBLE},
+			#{header.batchNo 				, jdbcType = VARCHAR},
+			#{basicEntity.province 			, jdbcType = VARCHAR},
+			#{basicEntity.city 				, jdbcType = VARCHAR},
+			#{basicEntity.county 			, jdbcType = VARCHAR},
+			#{basicEntity.address 			, jdbcType = VARCHAR},
+			#{basicEntity.addressee 		, jdbcType = VARCHAR},
+			#{basicEntity.mobile 			, jdbcType = VARCHAR},
+			#{basicEntity.clientIp 			, jdbcType = VARCHAR},
+			#{otherEntity.makeDate 			, jdbcType = DATE},
+			#{otherEntity.makeTime 			, jdbcType = VARCHAR}
+		)
+	</insert>
+	
+	<!-- 非网上购药实时扣款存储药店接口日志订单地址表（LCMedAddressInfoLog） -->
+		<insert id="insertLCMedAddressInfoLog" parameterType="body" >
+		insert into LCMedAddressInfoLog(SerialNo,LogSerialNo,MedCardNo,TransType,TransSerialNo,tkFlag,
+										SumPrice,SumClmPrice,BatchNo,
+										TransSerialNo7,TransSerialNo6,TransSerialNo5,MakeDate,MakeTime) 
+		values(
+			#{otherEntity.logSerialNo 		, jdbcType = VARCHAR},
+			#{otherEntity.logSerialNo 		, jdbcType = VARCHAR},
+			#{basicEntity.medCardNo 		, jdbcType = VARCHAR},
+			#{basicEntity.buyChnl 			, jdbcType = VARCHAR},
+			#{otherEntity.logSerialNo 		, jdbcType = VARCHAR},
+			#{otherEntity.state 			, jdbcType = VARCHAR},
+			#{basicEntity.sumPrice 			, jdbcType = DOUBLE},
+			#{basicEntity.sumClmPrice		, jdbcType = DOUBLE},
+			#{header.batchNo 				, jdbcType = VARCHAR},
+			#{basicEntity.province 			, jdbcType = VARCHAR},
+			#{basicEntity.city 				, jdbcType = VARCHAR},
+			#{basicEntity.county 			, jdbcType = VARCHAR},
+			#{otherEntity.makeDate 			, jdbcType = DATE},
+			#{otherEntity.makeTime 			, jdbcType = VARCHAR}
+		)
+	</insert>
+	
+	
+	<!-- 带明细实时扣款存储购药清单明细表（LCMedBuyDetail） -->
+	<insert id="addLCMedBuyDetail" parameterType="body" >
+		insert into LCMedBuyDetail(BatchNo,SeqNo,MedCardNo,MedName,MedType1,MedType2,MedType3,
+									Quanity,UnitPrice,SumPrice,BXFlag,MakeDate,MakeTime,StandByFlag1,StandByFlag2,
+									MedShopCode,ConterNo) 
+		values(
+			#{header.batchNo 				, jdbcType = VARCHAR},
+			#{realTimeTradeEntity.seqNo 	, jdbcType = VARCHAR},
+			#{basicEntity.medCardNo 		, jdbcType = VARCHAR},
+			#{realTimeTradeEntity.medName 	, jdbcType = VARCHAR},
+			#{realTimeTradeEntity.medType1 	, jdbcType = VARCHAR},
+			#{realTimeTradeEntity.medType2 	, jdbcType = VARCHAR},
+			#{realTimeTradeEntity.medType3 	, jdbcType = VARCHAR},
+			#{realTimeTradeEntity.quantity 	, jdbcType = DOUBLE},
+			#{realTimeTradeEntity.unitPrice , jdbcType = DOUBLE},
+			#{realTimeTradeEntity.sumPrice 	, jdbcType = DOUBLE},
+			#{realTimeTradeEntity.bxFlag 	, jdbcType = VARCHAR},
+			#{otherEntity.makeDate 			, jdbcType = DATE},
+			#{otherEntity.makeTime 			, jdbcType = VARCHAR},
+			#{basicEntity.buyDate 			, jdbcType = VARCHAR},
+			#{basicEntity.buyTime 			, jdbcType = VARCHAR},
+			#{basicEntity.medShopCode 		, jdbcType = VARCHAR},
+			#{basicEntity.counterNo 		, jdbcType = VARCHAR}
+		)
+	</insert>
+	
+	<!-- 不带明细实时扣款存储购药清单明细表（LCMedBuyDetail） -->
+	<insert id="insertLCMedBuyDetail" parameterType="body" >
+		insert into LCMedBuyDetail(BatchNo,SeqNo,MedCardNo,MedType1,SumPrice,MakeDate,MakeTime,
+									MedShopCode,ConterNo) 
+		values(
+			#{header.batchNo 				, jdbcType = VARCHAR},
+			#{realTimeTradeEntity.seqNo 	, jdbcType = VARCHAR},
+			#{basicEntity.medCardNo 		, jdbcType = VARCHAR},
+			#{realTimeTradeEntity.medType1 	, jdbcType = VARCHAR},
+			#{basicEntity.sumPrice 			, jdbcType = DOUBLE},
+			#{otherEntity.makeDate 			, jdbcType = DATE},
+			#{otherEntity.makeTime 			, jdbcType = VARCHAR},
+			#{basicEntity.medShopCode 		, jdbcType = VARCHAR},
+			#{basicEntity.counterNo 		, jdbcType = VARCHAR}
+		)
+	</insert>
+	
+	<!-- 实时交易存储LCMedBatchInfo表 -->
+	<insert id="insertLCMedBatchInfo" parameterType="body">
+		insert into LCMEDBATCHINFO(BATCHNO,SERIALNO,MEDCARDNO,MEDSHOPCODE,CONTERNO,MAKEDATE,MAKETIME)
+		values(
+			#{header.batchNo 				, jdbcType = VARCHAR},
+			#{header.batchNo 				, jdbcType = VARCHAR},
+			#{basicEntity.medCardNo 		, jdbcType = VARCHAR},
+			#{basicEntity.medShopCode 		, jdbcType = VARCHAR},
+			#{basicEntity.counterNo 		, jdbcType = VARCHAR},
+			#{otherEntity.makeDate 			, jdbcType = DATE},
+			#{otherEntity.makeTime 			, jdbcType = VARCHAR}
+		)
+	</insert>
+	
+	<!-- 实时扣款存储药店Med_TpaMain（Med_TpaMain） 
+	<update id="updateMedTpaMain" parameterType="String" >
+	 	update Med_TpaMain set state=#{otherEntity.state} where batchNo=#{headEntity.batchNo}
+	</update>-->
+	
+	<!-- 补卡换卡存入新的LCmedcarduserinfo -->
+	<insert id="addLCMedCardUserInfo" parameterType="body">
+		insert into LCmedcarduserinfo(MedCardNo,InsuredNo,GrpContNo,Name,Password,
+										CardState,ProvideDate,ProvideTime,ContNo,ProvideNo,
+											Memo,Bonus,ManageCom,Operator,MaxPubLimit,standbyflag1,phone,IDNO)
+		values(
+			#{cardEntity.newMedCardNo 		, jdbcType = VARCHAR},
+			#{cardEntity.insuredNo 			, jdbcType = VARCHAR},
+			#{cardEntity.grpContNo 			, jdbcType = VARCHAR},
+			#{cardEntity.name 				, jdbcType = VARCHAR},
+			#{cardEntity.password 			, jdbcType = VARCHAR},
+			#{cardEntity.cardState 			, jdbcType = VARCHAR},
+			#{cardEntity.provideDate 		, jdbcType = DATE},
+			#{cardEntity.provideTime		, jdbcType = VARCHAR},
+			#{cardEntity.contNo 			, jdbcType = VARCHAR},
+			#{cardEntity.provideNo 			, jdbcType = VARCHAR},
+			#{cardEntity.memo 				, jdbcType = VARCHAR},
+			#{cardEntity.bonus 				, jdbcType = DOUBLE},
+			#{cardEntity.manageCom			, jdbcType = VARCHAR},
+			#{cardEntity.operator 			, jdbcType = VARCHAR},
+			#{cardEntity.maxPubLimit 		, jdbcType = DOUBLE},
+			#{cardEntity.thirdParty 		, jdbcType = VARCHAR},
+			#{cardEntity.phone 				, jdbcType = VARCHAR},
+			#{cardEntity.idNo 				, jdbcType = VARCHAR}
+		)	
+	</insert>
+	
+	<!-- 补卡换卡存入Med_TpaDetail_Business表 -->
+	<insert id="addMedTpaDetailBusiness" parameterType="body" >
+		insert into Med_TpaDetail_Business(BatchNo,TradeType,ContNo,MedCardNo,MakeDate,MakeTime,ModifyDate,ModifyTime,Seqno) 
+		values(
+			#{header.batchNo 				, jdbcType = VARCHAR},
+			#{header.tradeType 				, jdbcType = VARCHAR},
+			#{cardEntity.contNo 			, jdbcType = VARCHAR},
+			#{cardEntity.newMedCardNo 		, jdbcType = VARCHAR},
+			#{otherEntity.makeDate 			, jdbcType = DATE},
+			#{otherEntity.makeTime 			, jdbcType = VARCHAR},
+			#{otherEntity.modifyDate 		, jdbcType = DATE},
+			#{otherEntity.modifyTime 		, jdbcType = VARCHAR},
+			'0'
+		)
+	</insert>
+	
+	<!-- 补卡换卡修改旧卡状态 LCMedCardUserInfo.cardState -->
+	<update id="updateLCMedCardUserInfo" parameterType="body" >
+	 	update LCMedCardUserInfo set cardState=#{cardEntity.oldCardState},lostDate=#{cardEntity.lostDate},lostTime=#{cardEntity.lostTime} where MedCardNo = #{cardEntity.oldMedCardNo}
+	</update>
+	
+	<!-- 补卡换卡存入LCMedCardUserInfo表 -->
+	<!-- <insert id="addLCMedCardUserInfo" parameterType="body" >
+		insert into LCMedCardUserInfo(MedCardNo,InsuredNo,GrpContNo,Name,Password,CardState, 
+										ProvideDate,ProvideTime,LostDate,LostTime,ContNo,ProvideNo
+										Memo,Bonus,ManageCom,Operator) 
+		values(
+			#{cardEntity.newMedCardNo 		, jdbcType = VARCHAR},
+			#{cardEntity.insuredNo 			, jdbcType = VARCHAR},
+			#{cardEntity.grpContNo 			, jdbcType = VARCHAR},
+			#{cardEntity.name 				, jdbcType = VARCHAR},
+			#{cardEntity.password 			, jdbcType = VARCHAR},
+			#{cardEntity.cardState 			, jdbcType = VARCHAR},
+			#{cardEntity.provideDate 		, jdbcType = VARCHAR},
+			#{cardEntity.provideTime 		, jdbcType = VARCHAR},
+			#{cardEntity.lostDate 			, jdbcType = VARCHAR},
+			#{cardEntity.lostTime 			, jdbcType = VARCHAR},
+			#{cardEntity.contNo 			, jdbcType = VARCHAR},
+			#{header.batchNo 				, jdbcType = VARCHAR},
+			#{cardEntity.memo 				, jdbcType = VARCHAR},
+			#{cardEntity.bonus 				, jdbcType = VARCHAR},
+			#{cardEntity.manageCom 			, jdbcType = VARCHAR},
+			#{cardEntity.operator 			, jdbcType = VARCHAR},
+		)
+	</insert> -->
+		
+	<!-- 存交易明细表,IDType怎么存 -->
+	<insert id="saveCardD" parameterType="body">
+		insert into Med_TpaDetail_Business(batchNo,tradeType,contNo,makeDate,makeTime,modifyDate,modifyTime,
+				phone, IDNo,seqNo,grpName,comName,idType,insureName)
+		values(#{otherEntity.batchNo},#{header.tradeType},#{customerEntity.contNo},#{otherEntity.makeDate},#{otherEntity.makeTime},
+				#{otherEntity.modifyDate},#{otherEntity.modifyTime}, #{customerEntity.mobile}, #{customerEntity.IDNo},
+				#{customerEntity.no},#{customerEntity.grpName},#{customerEntity.comName},#{customerEntity.IDType},#{customerEntity.name})
+	</insert>
+		
+	<!-- 存实体表 -->
+	<insert id="saveCardE" parameterType="body">
+		insert into LCmedcarduserinfo(medCardno,grpContNo,name,contNo,operator, password,provideDate,provideTime,cardState,standbyflag1,phone,idNo,insuredNo,manageCom)
+		values(#{customerEntity.medCardNo},#{customerEntity.grpContNo},#{customerEntity.name}, #{customerEntity.contNo},
+				#{otherEntity.operator},'000000',#{otherEntity.makeDate , jdbcType = DATE},#{otherEntity.makeTime},'1','RHGK',#{customerEntity.mobile},#{customerEntity.IDNo},
+				#{customerEntity.insuredNo},#{customerEntity.comCode})
+	</insert>
+		
+	<!-- 查找卡 -->
+	<select id="findCard" parameterType="customerEntity" resultType="String">
+		SELECT count(1) FROM LCmedcarduserinfo WHERE medCardNo = #{medCardNo} and contNo = #{contNo}
+	</select>
+	
+	<!-- 更新卡交易表 -->
+	<update id="updateCard" parameterType="body">
+		update Med_TpaDetail_Business set  medCardNo = #{customerEntity.medCardNo} , state = #{otherEntity.state} where batchNo = #{header.batchNo} and contNo = #{customerEntity.contNo}
+	</update>
+	
+	<!-- 查询批次 -->
+	<select id="queryBatchNo" parameterType="body" resultType="String">
+		select count(1) from LCMedBuyMain where batchNo=#{delEntity.batchNo} and makeDate=#{delEntity.tradeDate}
+	</select>
+	
+	<!-- 验证批次记录LCmedbuymain -->
+	<select id="isExists" parameterType="body" resultType="String">
+		select count(1) from LCmedbuymain where batchNo = #{delEntity.batchNo} and makeDate=#{delEntity.tradeDate}
+	</select>
+	
+	<!-- 验证批次记录LCmedbuydetail -->
+	<select id="isBe" parameterType="body" resultType="String">
+		select count(1) from LCmedbuydetail where batchNo =#{delEntity.batchNo} and makeDate =#{delEntity.tradeDate}
+	</select>
+	
+	<!-- 查询LCmedBuyMain -->
+	<select id="queryMedMain" parameterType="body" resultType="medBuyMainEntity">
+		select BatchNo,MedCardNo,MedType1,SumPayPrice,SumClmPrice,MakeDate,MakeTime,Memo,
+					StandByFlag1,StandByFlag2,ClmFlag,OrderNo,ApplyNo,ConsumeType,DeductType
+					from LCmedbuymain where batchNo= #{delEntity.batchNo} and makeDate=#{delEntity.tradeDate} 
+	</select>
+	<!-- 查询LCmedBuyDetail -->
+	<select id="queryMedDetail" parameterType="body" resultType="medBuyDetailEntity">
+		select BatchNo,SeqNo,MedCardNo,MedName,MedType1,MedType2,MedType3,Quanity,UnitPrice,SumPrice,BxFlag,
+					MakeDate,MakeTime,MedShopCode,ConterNo,Memo,StandByFlag1,StandByFlag2,StandByFlag3,StandByFlag4,
+					StandByFlag5,StandByFlag6,StandByFlag7 
+					from LCmedbuydetail where batchNo= #{delEntity.batchNo}and makeDate=#{delEntity.tradeDate}
+	</select>
+	
+	<!-- 插入备份表LBmedbuymain -->
+	<insert id="addBackups" parameterType="medBuyMainEntity">
+		insert into LBmedbuymain(SerialNo,BatchNo,MedCardNo,MedType1,SumPayPrice,SumClmPrice,MakeDate,MakeTime,Memo,
+													StandByFlag1,StandByFlag2,ClmFlag,OrderNo,ApplyNo,ConsumeType,DeductType) 
+			values(#{serialNo,jdbcType=VARCHAR},
+			#{batchNo , jdbcType = VARCHAR},
+			#{medCardNo       ,jdbcType = VARCHAR},
+			#{medType1          ,jdbcType = VARCHAR},
+			#{sumPayPrice      ,jdbcType = DOUBLE},
+			#{sumClmPrice      ,jdbcType = DOUBLE},
+			#{makeDate          ,jdbcType = DATE},
+			#{makeTime          ,jdbcType = VARCHAR},
+			#{memo                  ,jdbcType = VARCHAR},
+			#{standByFlag1    ,jdbcType = VARCHAR},
+			#{standByFlag2    ,jdbcType = VARCHAR},
+			#{clmFlag               ,jdbcType = VARCHAR},
+			#{orderNo            ,jdbcType = VARCHAR},
+			#{applyNo             ,jdbcType = VARCHAR},
+			#{consumeType     ,jdbcType = VARCHAR},
+			#{deductType       ,jdbcType = VARCHAR})
+	</insert>
+	
+	<!-- 插入备份表LBmedbuydetail -->
+	<insert id="addBack" parameterType="medBuyDetailEntity">
+		insert into LBMedBuyDetail (SerialNo,BatchNo,SeqNo,MedCardNo,MedName,MedType1,MedType2,MedType3,Quanity,UnitPrice,SumPrice,
+															BxFlag,MakeDate,MakeTime,MedShopCode,ConterNo,Memo,StandByFlag1,StandByFlag2,
+															StandByFlag3,StandByFlag4,StandByFlag5,StandByFlag6,StandByFlag7) 
+		values(#{serialNo,jdbcType=VARCHAR},
+		#{batchNo  ,jdbcType = VARCHAR},
+		#{seqNo                  ,jdbcType = VARCHAR},
+		#{medCardNo         ,jdbcType = VARCHAR},
+		#{medName             ,jdbcType = VARCHAR},
+		#{medType1            ,jdbcType = VARCHAR},
+		#{medType2            ,jdbcType = VARCHAR},
+		#{medType3            ,jdbcType = VARCHAR},
+		#{quanity                ,jdbcType = DOUBLE},
+		#{unitPrice              ,jdbcType = DOUBLE},
+		#{sumPrice              ,jdbcType = DOUBLE},
+		#{bxFlag                   ,jdbcType = VARCHAR},
+		#{makeDate             ,jdbcType = DATE},
+		#{makeTime             ,jdbcType = VARCHAR},
+		#{medShopCode       ,jdbcType = VARCHAR},
+		#{conterNo               ,jdbcType = VARCHAR},
+		#{memo                      ,jdbcType = VARCHAR},
+		#{standByFlag1        ,jdbcType = VARCHAR},
+		#{standByFlag2        ,jdbcType = VARCHAR},
+		#{standByFlag3        ,jdbcType = VARCHAR},
+		#{standByFlag4        ,jdbcType = VARCHAR},
+		#{standByFlag5        ,jdbcType = VARCHAR},
+		#{standByFlag6        ,jdbcType = VARCHAR},
+		#{standByFlag7        ,jdbcType = VARCHAR} )
+	</insert>
+	
+	<!-- 删除查询记录LCmedbuymain -->
+	<delete id="deleteRecord" parameterType="body">
+		delete from LCMedBuyMain where batchNo = #{delEntity.batchNo} and makeDate=#{delEntity.tradeDate}
+	</delete>
+	
+	<!-- 删除查询记录LCmedbuydetail -->
+	<delete id="removeRecord" parameterType="body">
+		delete from LCMedBuyDetail where batchNo=#{delEntity.batchNo} and makeDate=#{delEntity.tradeDate}
+	</delete>
+	
+	<!-- 查询校验批次是否允许删除 -->
+	<select id="queryVerify" parameterType="body" resultType="String">
+		select count(clmFlag) from LCmedbuymain where batchNo=#{delEntity.batchNo} and makeDate=#{delEntity.tradeDate} and clmFlag='1'
+	</select>
+	
+	<!-- 查询药品总金额 -->
+	<select id="querySumPrice" parameterType="body" resultType="Double">
+		select sum(sumPayPrice) from LCmedbuymain where batchNo=#{delEntity.batchNo} and makeDate=#{delEntity.tradeDate}
+	</select>
+	
+	<update id="updateLCMedBuyMain" parameterType="basicEntity">
+		update LCMedBuyMain set
+			SumPayPrice = #{sumPrice 	, jdbcType = DOUBLE} ,
+			SumClmPrice = nvl((select sum(sumPrice) from lcMedBuyDetail where batchno=#{taiKangBatchNo} and medCardNo = #{medCardNo} and medType1 = #{medType1} and bxflag='1'),0.00)
+		where batchno = #{taiKangBatchNo} 
+		and medCardNo = #{medCardNo} 
+		and medType1 = #{medType1}
+	</update>
+	
+</mapper>
+
+

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" ?> 
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="edu.trade.mapper.MedicineQueryMapper">
+		
+	<!-- 查询交易结果 -->
+	<select id="queryTradeResult" parameterType="body" resultType="String">
+		select state from Med_TpaMain where batchNo = #{queryEntity.batchNo} 
+	</select>
+
+	<!-- 查询余额 -->
+	<select id="queryBalance" parameterType="body" resultType="String">
+		select password from LCmedcarduserinfo where contNo=#{queryEntity.contNo} and medCardNo=#{queryEntity.medCardNo}
+	</select>
+	
+</mapper>

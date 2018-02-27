@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8" ?> 
+<!DOCTYPE configuration  PUBLIC "-//mybatis.org//DTD Config 3.0//EN"  
+			"http://mybatis.org/dtd/mybatis-3-config.dtd">
+			
+<configuration>
+
+	<typeAliases>
+		<typeAlias type="edu.trade.dto.Body" alias="body"/>
+		<typeAlias type="edu.trade.entity.BasicEntity" alias="basicEntity"/>
+		<typeAlias type="edu.trade.entity.CardEntity" alias="cardEntity"/>
+		<typeAlias type="edu.trade.entity.CustomerEntity" alias="customerEntity"/>
+		<typeAlias type="edu.trade.entity.Header" alias="header"/>
+		<typeAlias type="edu.trade.entity.QueryEntity" alias="queryEntity"/>
+		<typeAlias type="edu.trade.entity.RealTimeTradeEntity" alias="realTimeTradeEntity"/>
+		<typeAlias type="edu.trade.dto.ReturnEntity" alias="returnEntity"/>
+		<typeAlias type="edu.trade.entity.ReturnInfoEntity" alias="returnInfoEntity"/>
+		<typeAlias type="edu.trade.entity.TransEntity" alias="transEntity"/>
+		<typeAlias type="edu.trade.entity.ConfigEntity" alias="configEntity"/>
+		<typeAlias type="edu.trade.entity.ConfigInfoEntity" alias="configInfoEntity"/>
+		<typeAlias type="edu.trade.entity.MedBuyMainEntity" alias="medBuyMainEntity"/>
+		<typeAlias type="edu.trade.entity.MedBuyDetailEntity" alias="medBuyDetailEntity"/>
+		<typeAlias type="edu.trade.entity.DelEntity" alias="delEntity"/>
+		<typeAlias type="edu.trade.entity.OtherEntity" alias="otherEntity"/>
+	</typeAliases>
+	
+	<environments default="development">
+		<environment id="development">
+			<transactionManager type="JDBC" />
+			<dataSource type="POOLED">
+				<property name="driver" value="oracle.jdbc.driver.OracleDriver"></property>
+	        	<property name="url" value="jdbc:oracle:thin:@(DESCRIPTION = (ADDRESS_LIST = (ADDRESS = (PROTOCOL = TCP)(HOST = 10.129.16.1)(PORT = 1521)) ) (CONNECT_DATA = (SERVICE_NAME = tkeba) ) )"></property>
+	        	<property name="username" value="lis"></property>
+	        	<property name="password" value="tk3z5l9s"></property>
+	        <!-- 	<property name="poolMaximumActiveConnections" value="0" />
+	            <property name="poolTimeToWait" value="60000" />
+	            <property name="poolPingEnabled" value="true" />
+	            <property name="poolPingQuery" value="select 1 from dual" />
+        		<property name="poolPingConnectionsNotUsedFor" value="1800000" /> -->
+			</dataSource>
+		</environment>
+	</environments>
+	
+	<!-- 注册映射文件 -->
+	<mappers>
+		<mapper resource="com/tkmedicine/mapper/MedicineBatchMapper.xml"/>
+		<mapper resource="com/tkmedicine/mapper/MedicineQueryMapper.xml"/>
+		<mapper resource="com/tkmedicine/mapper/MedicineTradeMapper.xml"/>
+		<mapper resource="com/tkmedicine/mapper/MedicinePublicMapper.xml"/>
+	</mappers>
+	
+</configuration>

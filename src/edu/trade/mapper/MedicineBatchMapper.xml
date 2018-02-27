@@ -1,0 +1,240 @@
+<?xml version="1.0" encoding="UTF-8" ?> 
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+		"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="edu.trade.mapper.MedicineBatchMapper">
+	
+	<!-- 存交易明细表,IDType怎么存 -->
+	<insert id="saveCardD" parameterType="body">
+		insert into Med_TpaDetail_Business(batchNo,tradeType,contNo,makeDate,makeTime,modifyDate,modifyTime,
+				phone, IDNo,seqNo)
+		values(#{header.batchNo},#{header.tradeType},#{customerEntity.contNo},#{otherEntity.makeDate},#{otherEntity.makeTime},
+				#{otherEntity.modifyDate},#{otherEntity.modifyTime}, #{customerEntity.mobile}, #{customerEntity.IDNo},
+				#{customerEntity.no})
+	</insert>
+
+	<!-- 存新药房业务表 -->
+	<insert id="insertCustomer" parameterType="Body">
+		insert into Med_TpaDetail_Business (BatchNo,TradeType,makeDate,makeTime,modifyDate,modifyTime,contNo,IDNo,seqNo,state,
+			IDType,grpName,comName,phone,medCardNo) 
+			values(#{header.batchNo            ,jdbcType=VARCHAR},
+				#{header.tradeType                 ,jdbcType=VARCHAR},
+				#{otherEntity.makeDate          ,jdbcType=DATE},
+				#{otherEntity.makeTime           ,jdbcType=VARCHAR},
+				#{otherEntity.modifyDate        ,jdbcType=DATE},
+				#{otherEntity.modifyTime        ,jdbcType=VARCHAR},
+				#{customerEntity.contNo         ,jdbcType=VARCHAR},
+				#{customerEntity.IDNo            ,jdbcType=VARCHAR},
+				#{customerEntity.no                  ,jdbcType=VARCHAR},
+				#{otherEntity.state                   ,jdbcType=CHAR},
+				#{customerEntity.IDType         ,jdbcType=VARCHAR},
+				#{customerEntity.grpName       ,jdbcType=VARCHAR},
+				#{customerEntity.comName       ,jdbcType=VARCHAR},
+				#{customerEntity.mobile            ,jdbcType=VARCHAR},
+				#{customerEntity.medCardNo    ,jdbcType=VARCHAR})
+	</insert>
+	
+	<!-- 查询购药卡用户信息 -->
+	<select id="queryCardDetail" parameterType="body" resultType="cardEntity">
+		select medCardNo from LCMedcarduserinfo where provideDate=#{cardEntity.provideDate} and standbyflag1=#{customerEntity.thirdParty}
+	</select>
+	
+<!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+	<!-- 返回list 的select 语句，注意 resultMap 的值是指向前面定义好的 -->
+ 	<select id="selectLCMedBuyMain" parameterType="body" 
+ 			resultMap="resultBasicEntityList" resultType="java.util.List">
+		select  *
+		from LCMedBuyMain mbm,lcmedcarduserinfo lcmcui
+		where mbm.medcardno = lcmcui.medcardno
+	 	and   lcmcui.standbyflag1 = #{customerEntity.thirdParty} 
+	<!-- 	and	  mbm.MakeDate = #{basicEntity.buyDate} -->
+		and	  mbm.standbyflag1 = #{basicEntity.buyDate}
+    </select>
+	
+	<resultMap type="basicEntity" id="resultBasicEntityList" >
+	    <result column="BatchNo" 				property="taiKangBatchNo" />
+        <result column="MedCardNo" 				property="medCardNo" />
+        <result column="SumPayPrice" 			property="sumPrice" />
+        <result column="SumClmPrice" 			property="sumClmPrice" />
+        <result column="standbyflag1" 				property="buyDate" />
+        <result column="standbyflag2" 				property="buyTime" />
+        <collection property="realTimeTradeEntityList" 	ofType="realTimeTradeEntity"
+                 select="selectLCMedBuyDetail" 
+                 column="{batchno2 = BatchNo ,MedCardNo2 = MedCardNo , MedType12=MedType1}" >  
+        </collection>
+    </resultMap> 
+	<select id="selectLCMedBuyDetail" parameterType="java.util.HashMap" 
+			resultType="realTimeTradeEntity" resultMap="resultRealTimeTradeEntityList">
+	 	select mbd.BatchNo , mbd.SeqNo , mbd.MedCardNo , mbd.MedName , 
+        		mbd.MedType1 , mbd.MedType2 , mbd.MedType3 , 
+        		mbd.Quanity , mbd.UnitPrice , mbd.MedShopCode , 
+        		mbd.ConterNo , mbd.BXFlag 
+        from LCMedBuyDetail mbd 
+        where mbd.batchno = '${batchno2}' 
+        and mbd.MedCardNo = '${MedCardNo2}'
+       	and mbd.MedType1 = '${MedType12}'
+	</select>
+	<!-- 为了返回list 类型而定义的returnMap -->
+    <resultMap type="realTimeTradeEntity" id="resultRealTimeTradeEntityList">
+        <result column="SeqNo" 					property="seqNo" />
+        <result column="MedName" 				property="medName" />
+        <result column="MedType1" 				property="medType1" />
+        <result column="MedType2" 				property="medType2" />
+        <result column="MedType3" 				property="medType3" />
+        <result column="Quanity" 				property="quantity" />
+        <result column="UnitPrice" 				property="unitPrice" />
+        <result column="BXFlag" 				property="bxFlag" /> 
+    </resultMap>
+    
+    <!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+    <!-- 返回list 的select 语句，注意 resultMap 的值是指向前面定义好的 -->
+ 	<select id="selectLCMedBuyMainB" parameterType="body" 
+ 			resultMap="resultBasicEntityListB" resultType="java.util.List">
+		select  *
+		from LBMedBuyMain mbm,lcmedcarduserinfo lcmcui
+		where mbm.medcardno = lcmcui.medcardno
+	 	and   lcmcui.standbyflag1 = #{customerEntity.thirdParty}
+		<!-- 	and	  mbm.MakeDate = #{basicEntity.buyDate} -->
+		and	  mbm.standbyflag1 = #{basicEntity.buyDate}
+    </select>
+	
+	<resultMap type="basicEntity" id="resultBasicEntityListB" >
+	    <result column="BatchNo" 				property="taiKangBatchNo" />
+        <result column="MedCardNo" 				property="medCardNo" />
+        <result column="SumPayPrice" 			property="sumPrice" />
+        <result column="SumClmPrice" 			property="sumClmPrice" />
+        <result column="standbyflag1" 				property="buyDate" />
+        <result column="standbyflag2" 				property="buyTime" />
+        <collection property="realTimeTradeEntityList" 	ofType="realTimeTradeEntity"
+                 select="selectLCMedBuyDetailB" 
+                 column="{batchno2 = BatchNo ,MedCardNo2 = MedCardNo , MedType12=MedType1}" >  
+        </collection>
+    </resultMap> 
+	<select id="selectLCMedBuyDetailB" parameterType="java.util.HashMap" 
+			resultType="realTimeTradeEntity" resultMap="resultRealTimeTradeEntityListB">
+	 	select mbd.BatchNo , mbd.SeqNo , mbd.MedCardNo , mbd.MedName , 
+        		mbd.MedType1 , mbd.MedType2 , mbd.MedType3 , 
+        		mbd.Quanity , mbd.UnitPrice , mbd.MedShopCode , 
+        		mbd.ConterNo , mbd.BXFlag 
+        from LBMedBuyDetail mbd 
+        where mbd.batchno = '${batchno2}' 
+        and mbd.MedCardNo = '${MedCardNo2}'
+       	and mbd.MedType1 = '${MedType12}'
+	</select>
+	<!-- 为了返回list 类型而定义的returnMap -->
+    <resultMap type="realTimeTradeEntity" id="resultRealTimeTradeEntityListB">
+        <result column="SeqNo" 					property="seqNo" />
+        <result column="MedName" 				property="medName" />
+        <result column="MedType1" 				property="medType1" />
+        <result column="MedType2" 				property="medType2" />
+        <result column="MedType3" 				property="medType3" />
+        <result column="Quanity" 				property="quantity" />
+        <result column="UnitPrice" 				property="unitPrice" />
+        <result column="BXFlag" 				property="bxFlag" /> 
+    </resultMap>
+    
+    <!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+		<!-- 明细对账存储购药清单明细表（LCMedBuyDetail） -->
+	<insert id="insertLCMedBuyDetail" parameterType="body" >
+		insert into LCMedBuyDetail(BatchNo,SeqNo,MedCardNo,MedName,MedType1,MedType2,MedType3,
+									Quantity,UnitPrice,SumPrice,BXFlag,MakeDate,MakeTime,
+									MedShopCode,ConterNo) 
+		values(
+			#{basicEntity.taiKangBatchNo 	, jdbcType = VARCHAR},
+			#{realTimeTradeEntity.seqNo 	, jdbcType = VARCHAR},
+			#{basicEntity.medCardNo 		, jdbcType = VARCHAR},
+			#{realTimeTradeEntity.medName 	, jdbcType = VARCHAR},
+			#{realTimeTradeEntity.medType1 	, jdbcType = VARCHAR},
+			#{realTimeTradeEntity.medType2 	, jdbcType = VARCHAR},
+			#{realTimeTradeEntity.medType3 	, jdbcType = VARCHAR},
+			#{realTimeTradeEntity.quantity 	, jdbcType = DOUBLE},
+			#{realTimeTradeEntity.unitPrice , jdbcType = DOUBLE},
+			#{basicEntity.sumPrice 			, jdbcType = DOUBLE},
+			#{realTimeTradeEntity.bxFlag 	, jdbcType = VARCHAR},
+			#{basicEntity.buyDate 			, jdbcType = DATE},
+			#{basicEntity.buyTime			, jdbcType = VARCHAR},
+			#{basicEntity.medShopCode 		, jdbcType = VARCHAR},
+			#{basicEntity.counterNo 		, jdbcType = VARCHAR}
+		)
+	</insert>
+	
+	<update id="updateLCMedBuyDetail">
+		update LCMedBuyDetail set
+			SeqNo = #{realTimeTradeEntity.seqNo 		, jdbcType = VARCHAR},
+			MedCardNo = #{basicEntity.medCardNo 		, jdbcType = VARCHAR},
+			MedName = #{realTimeTradeEntity.medName 	, jdbcType = VARCHAR},
+			MedType1 = #{realTimeTradeEntity.medType1 	, jdbcType = VARCHAR},
+			MedType2 = #{realTimeTradeEntity.medType2 	, jdbcType = VARCHAR},
+			MedType3 = #{realTimeTradeEntity.medType3 	, jdbcType = VARCHAR},
+			Quantity = #{realTimeTradeEntity.quantity 	, jdbcType = DOUBLE},
+			UnitPrice = #{realTimeTradeEntity.unitPrice , jdbcType = DOUBLE},
+			SumPrice = #{basicEntity.sumPrice 			, jdbcType = DOUBLE},
+			BXFlag = #{realTimeTradeEntity.bxFlag 		, jdbcType = VARCHAR},
+			MakeDate = #{basicEntity.buyDate 			, jdbcType = DATE},
+			MakeTime = #{basicEntity.buyTime			, jdbcType = VARCHAR},
+			MedShopCode = #{basicEntity.medShopCode 	, jdbcType = VARCHAR},
+			ConterNo = #{basicEntity.counterNo 			, jdbcType = VARCHAR}
+		where batchno = #{basicEntity.taiKangBatchNo}
+	</update>
+	
+	<!-- 明细上传存储药店接口日志订单地址表（LCMedAddressInfoLog） -->
+	<insert id="insertLCMedAddressInfoLog" parameterType="body" >
+		insert into LCMedAddressInfoLog(SerialNo,LogSerialNo,MedCardNo,TransType,TransSerialNo,tkFlag,
+										SumPrice,SumClmPrice,BatchNo,
+										TransSerialNo7,TransSerialNo6,TransSerialNo5,TransSerialNo4,TransSerialNo3,
+										Mobile,IP,MakeDate,MakeTime) 
+		values(
+			#{otherEntity.logSerialNo 		, jdbcType = VARCHAR},
+			#{otherEntity.logSerialNo 		, jdbcType = VARCHAR},
+			#{basicEntity.medCardNo 		, jdbcType = VARCHAR},
+			#{basicEntity.buyChnl 			, jdbcType  = VARCHAR},
+			#{otherEntity.logSerialNo 		, jdbcType = VARCHAR},
+			#{otherEntity.state 			, jdbcType = VARCHAR},
+			#{basicEntity.sumPrice 			, jdbcType = DOUBLE},
+			#{basicEntity.sumClmPrice		, jdbcType = DOUBLE},
+			#{basicEntity.taiKangBatchNo 	, jdbcType = VARCHAR},
+			#{basicEntity.province 			, jdbcType = VARCHAR},
+			#{basicEntity.city 				, jdbcType = VARCHAR},
+			#{basicEntity.county 			, jdbcType = VARCHAR},
+			#{basicEntity.address 			, jdbcType = VARCHAR},
+			#{basicEntity.addressee 		, jdbcType = VARCHAR},
+			#{basicEntity.mobile 			, jdbcType = VARCHAR},
+			#{basicEntity.clientIp 			, jdbcType = VARCHAR},
+			#{otherEntity.buyDate 			, jdbcType = DATE},
+			#{otherEntity.buyTime 			, jdbcType = VARCHAR}
+		)
+	</insert>
+	
+	
+	
+	<!-- 明细上传修改LCMedBuyMain中的信息 -->
+	<update id="updateLCMedBuyMain" parameterType="body">
+		update LCMedBuyMain set state='0',resultMsg=#{msg} where batchno=#{batchNo} and contno=#{contNo}
+	</update>
+	
+	<!-- 明细上传修改LCMedBuyMain中的信息 -->
+	<update id="updateMedTpaMain" parameterType="body">
+		update Med_TpaMain set state='0',resultMsg=#{msg} where batchno=#{batchNo} and contno=#{contNo}
+	</update>
+	
+	<!-- 查询客户变更信息 -->
+	<select id="queryCustomer" parameterType="body" resultMap="resultCustomerEntity">
+		select l.name,c.insuredidtype,c.insuredidno,c.contno,b.grpname,
+		(select lc.mobile from lcaddress lc where lc.addressno=d.addressno and lc.customerno=d.insuredno) mobile
+		from lcmedcarduserinfo l,lcgrpcont b,lccont c,lcinsured d
+		where l.cardstate='1' and l.contno=c.contno and  l.grpcontno=b.grpcontno and c.contno=d.contno
+		and l.standbyflag1=#{customerEntity.thirdParty}
+		and exists (select 1 from lpedoritem x where x.modifydate=#{cardEntity.provideDate} and x.contno=l.contno
+		and x.edorstate='0' and x.edortype in('BB','IC'))
+	</select>
+	<resultMap id="resultCustomerEntity" type="body">
+		 <result column="name" 				property="customerEntity.name" />
+		 <result column="insuredidtype" 			property="customerEntity.IDType" />
+		 <result column="insuredidno"                property="customerEntity.IDNo"/>
+		 <result column="contno"                property="customerEntity.contNo"/>
+		 <result column="grpname"                property="customerEntity.grpName"/>
+		 <result column="mobile"                property="customerEntity.mobile"/>
+	</resultMap>
+	
+</mapper>
+

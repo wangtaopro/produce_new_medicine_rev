@@ -1,0 +1,232 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="edu.trade.mapper.MedicinePublicMapper">
+	<select id="queryIsIpRight" parameterType="String" resultType="Integer">
+		select count(1) from ldmedcode where license = #{ip}
+	</select>
+	
+	<!-- 商户号是否维护 -->	
+	<select id="queryIsDrugShopRight" parameterType="String" resultType="String">
+		select count(1) from ldmedcode where codetype = 'medshopcode' and code = #{medShopCode} 
+	</select>
+	
+	<!-- 商户号是否在黑名单 -->
+	<select id="queryIsBlackList" parameterType="String" resultType="String">
+		select count(1) from ldmedcode where code = #{medShopCode} and stranger = '1'
+	</select>	
+	
+	<!-- 终端号是否维护 -->	
+	<select id="queryIsDrugConterRight" parameterType="String" resultType="String">
+		select count(1) from ldmedcode where codetype = 'medconter' and code = #{counterNo} 
+	</select>
+	
+	<!-- 终端号是否维护 -->	
+	<select id="queryIsMedCardNoTrue" parameterType="String" resultType="String">
+		select count(1) from lcmedcarduserinfo where standbyflag1 = 'RHGK' and medcardno = #{medCardNo}
+	</select>
+		
+	<!-- 存储药店Med_TpaMain（Med_TpaMain） -->
+	<insert id="addMedTpaMain" parameterType="body" >
+		insert into Med_TpaMain(BatchNo,TradeType,State,SendMessage,AcceptMessage,MakeDate,MakeTime,
+										ModifyDate,ModifyTime,ForeignBatchNo,MedShopCode,Operator,
+										TransSumVolume,BatchCount
+								)
+		values(
+			#{otherEntity.batchNo 				, jdbcType = VARCHAR},
+			#{header.tradeType 					, jdbcType = VARCHAR},
+			#{otherEntity.state 				, jdbcType = VARCHAR},
+			#{otherEntity.sendMessage 			, jdbcType = VARCHAR},
+			#{otherEntity.acceptMessage 		, jdbcType = VARCHAR},
+			#{otherEntity.makeDate 				, jdbcType = DATE},
+			#{otherEntity.makeTime 				, jdbcType = VARCHAR},
+			#{otherEntity.modifyDate 			, jdbcType = DATE},
+			#{otherEntity.modifyTime 			, jdbcType = VARCHAR},
+			#{header.batchNo		 	 		, jdbcType = VARCHAR},
+			#{basicEntity.medShopCode 			, jdbcType = VARCHAR},
+			#{otherEntity.operator 				, jdbcType = VARCHAR},
+			#{basicEntity.transSumVolume 		, jdbcType = DOUBLE},
+			#{basicEntity.batchCount 			, jdbcType = INTEGER}
+		)
+	</insert>
+	
+	<!-- 回写表状态 -->
+	<update id="modifyMainState" parameterType="body">
+		update Med_TpaMain set state = #{otherEntity.state},sendMessage = #{otherEntity.sendMessage} where batchNo  = #{header.batchNo}
+	</update>
+	
+	<!-- 查询旧表信息 -->
+	<!-- 为了返回list 类型而定义的returnMap -->
+    <resultMap type="cardEntity" id="resultCardEntityList">
+        <id column="MedCardNo" 			property="oldMedCardNo" />
+        <result column="InsuredNo" 		property="insuredNo" />
+        <result column="GrpContNo" 		property="grpContNo" />
+        <result column="Name" 			property="name" />
+        <result column="Password" 		property="password" />
+        <result column="ContNo" 		property="contNo" />
+        <result column="Memo" 			property="memo" />
+        <result column="Bonus" 			property="bonus" />
+        <result column="ManageCom" 		property="manageCom" />
+        <result column="Operator" 		property="operator" />
+        <result column="MaxPubLimit" 	property="maxPubLimit" />
+        <result column="standByFlag1" 	property="thirdParty" />
+        <result column="Phone" 			property="phone" />
+       	<result column="IDNo" 			property="idNo" />
+    </resultMap>
+    
+	<!-- 返回list 的select 语句，注意 resultMap 的值是指向前面定义好的 -->
+    <select id="selectLCMedCardUserInfo" parameterType="String" resultMap="resultCardEntityList">
+        select MedCardNo,InsuredNo,GrpContNo,Name,Password,ContNo,Memo,Bonus,ManageCom,Operator,MaxPubLimit,standByFlag1,Phone,IDNo
+        from LCMedCardUserInfo where MedCardNo = #{oldMedCardNo}
+    </select>
+    
+    <select id="selectMedTpaMain" parameterType="String" resultType="Integer">
+    	select count(1) from Med_TpaMain where makedate = date#{date}
+    </select>
+    
+    <select id="selectBatchNoFromMedTpaMain" parameterType="String" resultType="String">
+    	select batchno from MedTpaMain where BatchNo = #{foreignBatchNo}
+    </select>
+    
+    <select id="selectSumPayPriceFromLCMedBuyMain" parameterType="String" resultType="Double">
+    	select SumPayPrice from LCMedBuyMain where batchno = #{batchNo}
+    </select>
+    
+    <!-- 查询校验位 -->
+	<select id="queryCheckBit" parameterType="String" resultType="String">
+		select count(1) from litpaInfo where standbyflag2 = #{checkBit}
+	</select>
+		
+	<!-- 获取配置文件 -->
+	<select id="selectConfigByName" parameterType="configInfoEntity" resultMap="configMap">
+		select path.tpaCode,path.businessType,path.IP,path.userName,path.password,path.port,path.tparelPath,path.tpaabsPath,path.standbyflag1,info.shortName,info.name,info.standbyflag2 
+		from litpaPath path, litpaInfo info 
+		where path.tpaCode = info.tpaCode and info.shortName = #{shortName} and info.standByFlag2 = #{standByFlag1}
+	</select>
+	
+	<!-- 配置ResultMap -->
+	<resultMap type="configEntity" id="configMap">
+		
+		<id column="tpaCode" property="tpaCode"/>
+		<result column="businessType" property="businessType"/>
+		<result column="ip" property="ip"/>
+		<result column="username" property="username"/>
+		<result column="password" property="password"/>
+		<result column="port" property="port"/>
+		<result column="port" property="port"/>
+		<result column="tpaRelPath" property="tpaRelPath"/>
+		<result column="tpaAbsPath" property="tpaAbsPath"/>
+		<result column="midRelPath" property="midRelPath"/>
+		<result column="midAbsPath" property="midAbsPath"/>
+		<result column="transRelPath" property="transRelPath"/>
+		<result column="transAbsPath" property="transAbsPath"/>
+		<result column="ebaRelPath" property="ebaRelPath"/>
+		<result column="ebaAbsPath" property="ebaAbsPath"/>
+		<result column="backupRelPath" property="backupRelPath"/>
+		<result column="backupAbsPath" property="backupAbsPath"/>
+		<result column="standbyFlag1" property="standByFlag1"/>
+		<result column="standbyFlag2" property="standByFlag2"/>
+		<result column="standbyFlag3" property="standByFlag3"/>
+		<result column="operator" property="operator"/>
+		<result column="makeDate" property="makeDate"/>
+		<result column="makeDate" property="makeDate"/>
+		<result column="makeTime" property="makeTime"/>
+		<result column="modifyDate" property="modifyDate"/>
+		<result column="modifyTime" property="modifyTime"/>
+		
+		<association property="configInfoEntity" javaType="ConfigInfoEntity">
+			<id column="tpaCode" property="tpaCode"/>
+			<result column="name" property="name"/>
+			<result column="shortName" property="shortName"/>	
+			<result column="toGetHerFlag" property="toGetHerFlag"/>
+			<result column="manageCom" property="manageCom"/>
+			<result column="linkMan" property="linkMan"/>	
+			<result column="phone" property="phone"/>
+			<result column="mobile" property="mobile"/>	
+			<result column="address" property="address"/>	
+			<result column="postAlCode" property="postAlCode"/>	
+			<result column="bankCode" property="bankCode"/>	
+			<result column="bankName" property="bankName"/>
+			<result column="bankAccNo" property="bankAccNo"/>
+			<result column="standByFlag1" property="standByFlag1"/>	
+			<result column="standByFlag2" property="standByFlag2"/>	
+			<result column="standByFlag3" property="standByFlag3"/>	
+			<result column="operator" property="operator"/>
+			<result column="makeDate" property="makeDate"/>
+			<result column="makeTime" property="makeTime"/>
+			<result column="modifyDate" property="modifyDate"/>
+			<result column="modifyTime" property="modifyTime"/>
+			<result column="standByFlag1" property="standByFlag1"/>	
+			<result column="standByFlag2" property="standByFlag2"/>
+			<result column="standByFlag3" property="standByFlag3"/>
+		</association>
+		
+	</resultMap>
+	
+	<!-- 通过IP查询KEY -->
+	<select id="selectKeyByIp" parameterType="String" resultType="String">
+		select standByFlag1 from litpaPath WHERE standByFlag3 = #{IP}
+	</select>
+	
+	<!-- 通过medtype1查询每个medtype1的总价 -->
+	<select id="selectSumPriceByMedType1" parameterType="String" resultType="java.util.List" resultMap="resultBasicEntityList">
+		select batchNo , medCardNo , medtype1 , sum(sumPrice) from LCmedbuydetail l where l.batchNo = #{batchno}   group by Medtype1 , batchNo , medCardNo
+	</select>
+	<resultMap type="basicEntity" id="resultBasicEntityList" >
+		<result column="batchno"  		 property="taiKangBatchNo" /> 
+		<result column="medCardNo"  	 property="medCardNo" /> 
+		<result column="medtype1" 		 property="medType1" /> 
+	    <result column="sum(sumPrice)"   property="sumPrice" /> 
+    </resultMap>
+    
+    <!-- 通过contno查询customerEntity -->
+    <select id="selectCustomerEntityByContno" parameterType="String" resultType="customerEntity" resultMap="resultCustomerEntity">
+		select a.grpContNo,a.name,a.idNo,a.insuredNo From LCinsured a where a.contNo=#{contNo}
+	</select>
+	<resultMap type="customerEntity" id="resultCustomerEntity" >
+		<result column="grpcontno"  		property="grpContNo" /> 
+		<result column="name"  				property="name" /> 
+	    <result column="idno"  				property="IDNo" /> 
+	    <result column="insuredNo"  		property="insuredNo" /> 
+    </resultMap>
+    
+    <select id="selectIsModifyCard" parameterType="String" resultType="String">
+    	select CardState from lcmedcarduserinfo where MEDCARDNO = #{medCardNo}
+    </select>
+    
+</mapper>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

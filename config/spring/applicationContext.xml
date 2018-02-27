@@ -1,0 +1,272 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"  
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"  
+    xmlns:context="http://www.springframework.org/schema/context" xmlns:tx="http://www.springframework.org/schema/tx"  
+    xsi:schemaLocation="
+	       http://www.springframework.org/schema/aop
+	       http://www.springframework.org/schema/aop/spring-aop-4.0.xsd  
+	       http://www.springframework.org/schema/beans
+	       http://www.springframework.org/schema/beans/spring-beans-4.0.xsd  
+	       http://www.springframework.org/schema/data/jpa
+	       http://www.springframework.org/schema/data/jpa/spring-jpa-1.3.xsd  
+	       http://www.springframework.org/schema/tx   
+	       http://www.springframework.org/schema/tx/spring-tx-4.0.xsd
+	       http://www.springframework.org/schema/context   
+	       http://www.springframework.org/schema/context/spring-context-4.0.xsd">
+		
+        <!-- 注解配置 -->
+        <context:annotation-config/>
+        
+        <!-- 组件自动扫描 -->
+        <context:component-scan base-package="com.medicine.*"/>
+        
+        <!-- context:property-placeholder location="classpath:mapper/jdbc.properties"/> -->
+        
+        <!-- 配置数据库文件 -->
+        <bean class= "org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+             <property name ="locations">
+                   <list>
+                         <value>classpath:mapper/jdbc.properties</value>
+                   </list>
+             </property >
+        </bean>
+        
+        <!-- 配置数据源 -->
+        <bean id="dataSource"  class="org.apache.commons.dbcp.BasicDataSource" >
+        	
+        	<property name="driverClassName" value="oracle.jdbc.driver.OracleDriver"></property>
+        	<property name="url" value="jdbc:oracle:thin:@(DESCRIPTION = (ADDRESS_LIST = (ADDRESS = (PROTOCOL = TCP)(HOST = 10.129.16.1)(PORT = 1521)) ) (CONNECT_DATA = (SERVICE_NAME = tkeba) ) )"></property>
+        	<property name="username" value="lis"></property>
+        	<property name="password" value="tk3z5l9s"></property>
+        	
+        	<property name="minIdle" value="40" />        <!-- 队列中的最小等待数  --> 
+	        <property name="maxIdle" value="50" />        <!-- 队列中的最大等待数  --> 
+	        <property name="maxWait" value="60000" />        <!-- 最长等待时间，单位毫秒-->  
+	        <property name="maxActive" value="300" />    <!-- 最大活跃数 -->  
+	        <property name="initialSize" value="30" /> 	<!--初始线程数量  -->
+			
+        </bean>
+	
+		<!-- 配置二级缓存 -->
+		<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+			<property name="dataSource" ref="dataSource"></property>
+			<property name="configLocation" value="classpath:mapper/config.xml" />
+		</bean>
+				
+		<!-- SqlSession模版 -->
+		<bean id="sqlSessionTemplate" class="org.mybatis.spring.SqlSessionTemplate">
+			<constructor-arg index="0" ref="sqlSessionFactory"/>
+		</bean>
+		
+		<!-- 配置mapper -->
+		<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+			<property name="basePackage" value="com.medicine.mapper"></property>
+			<property name="sqlSessionFactoryBeanName" value="sqlSessionFactory"></property>
+		</bean>
+		
+		<!-- 配置事务管理 -->
+		<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">  
+	        <property name="dataSource" ref="dataSource"/>  
+	    </bean>
+				
+		<!-- AOP配置事务 -->
+		<tx:advice id="txAdvicer" transaction-manager="transactionManager">
+			<tx:attributes>
+				<tx:method name="query*" propagation="REQUIRED" read-only= "true"/>
+				<tx:method name="find*" propagation="REQUIRED" read-only= "true"/>
+				<tx:method name="select*" propagation="REQUIRED" read-only= "true"/>
+				<tx:method name="delete*" propagation="REQUIRED"/>
+				<tx:method name="update*" propagation="REQUIRED"/>
+				<tx:method name="modify*" propagation="REQUIRED"/>
+				<tx:method name="save*" propagation="REQUIRED"/>
+				<tx:method name="add*" propagation="REQUIRED"/>
+				<tx:method name="insert*" propagation="REQUIRED"/>
+				<tx:method name="deduct" propagation="REQUIRED"/>
+				<tx:method name="*" propagation="REQUIRED" read-only= "true"/>
+			</tx:attributes>
+		</tx:advice>
+		
+		<!-- 配置事务管理器 -->
+		<tx:annotation-driven transaction-manager="transactionManager" />
+		
+		<!-- aop切面 -->
+		<aop:config>
+			<aop:pointcut id="txPointCut" expression="execution(* *..*Service.*(..))" />
+			<aop:advisor advice-ref="txAdvicer" pointcut-ref="txPointCut"/>
+		</aop:config>
+		
+		<!-- 配置地址 -->
+		<bean class="org.springframework.beans.factory.config.CustomEditorConfigurer">
+			<property name="customEditors">
+				<map>
+					<entry key="java.net.SocketAddress"
+						value="org.apache.mina.integration.beans.InetSocketAddressEditor">
+					</entry>
+				</map>
+			</property>
+		</bean>
+		
+		<!-- 配置业务处理类 -->
+		<bean id="serviceHandler" class="edu.trade.mina.ServerHandler" />
+				
+		<!-- 配置mina服务器 -->
+		<bean id="ioAcceptor" class="org.apache.mina.transport.socket.nio.NioSocketAcceptor"
+			init-method="bind" destroy-method="unbind">
+			<property name="defaultLocalAddress" value=":9080" />
+			<property name="handler" ref="serviceHandler" />
+			<property name="filterChainBuilder" ref="filterChainBuilder" />
+		</bean>
+		
+		<!-- 配置空闲等待时长 - 30秒 -->
+		<bean id="sessionFactory" factory-bean="ioAcceptor" factory-method="getSessionConfig"> 
+			<property name="bothIdleTime" value="60000"></property>
+		</bean>
+		
+		<!-- 配置解码器 -->
+		<bean id="codec" class="org.apache.mina.filter.codec.ProtocolCodecFilter">
+			<constructor-arg>
+				<bean class="org.apache.mina.filter.codec.serialization.ObjectSerializationCodecFactory"/>
+			</constructor-arg>
+		</bean>
+		
+		<!-- 配置日志过滤器 -->
+		<bean id="logger" class="org.apache.mina.filter.logging.LoggingFilter"></bean>
+		<bean id="executors" class="org.apache.mina.filter.executor.ExecutorFilter"></bean>
+		
+		<!-- 将日志和解码器添加 -->
+		<bean id="filterChainBuilder" class="org.apache.mina.core.filterchain.DefaultIoFilterChainBuilder">
+			<property name="filters">
+				<map>
+					<entry key="codec" value-ref="codec"/>
+					<entry key="logger" value-ref="logger"/>
+					<entry key="executors" value-ref="executors"/>
+				</map>
+			</property>
+		</bean>
+		
+		<!-- 调度类 -->
+		<bean id="batchTask" class="edu.trade.quartz.BatchTask"></bean>
+		
+		<bean id="checkDailyAccount" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+            <!-- 调用的类 -->
+            <property name="targetObject">
+                <ref bean="batchTask"/>
+            </property>
+            <!-- 调用类中的方法 -->
+            <property name="targetMethod">
+                <value>checkDailyAccount</value>
+            </property>
+        </bean>
+        
+		<bean id="checkDailyCard" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+            <!-- 调用的类 -->
+            <property name="targetObject">
+                <ref bean="batchTask"/>
+            </property>
+            <!-- 调用类中的方法 -->
+            <property name="targetMethod">
+                <value>checkDailyCard</value>
+            </property>
+        </bean>
+        
+		<bean id="changeUserInfo" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+            <!-- 调用的类 -->
+            <property name="targetObject">
+                <ref bean="batchTask"/>
+            </property>
+            <!-- 调用类中的方法 -->
+            <property name="targetMethod">
+                <value>changeUserInfo</value>
+            </property>
+        </bean>
+        
+        <bean id="queryConnection" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+            <!-- 调用的类 -->
+            <property name="targetObject">
+                <ref bean="batchTask"/>
+            </property>
+            <!-- 调用类中的方法 -->
+            <property name="targetMethod">
+                <value>queryConnection</value>
+            </property>
+        </bean>
+        
+        <bean id="queryCheckConnection" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+            <!-- 调用的类 -->
+            <property name="targetObject">
+                <ref bean="batchTask"/>
+            </property>
+            <!-- 调用类中的方法 -->
+            <property name="targetMethod">
+                <value>queryCheckConnection</value>
+            </property>
+        </bean>
+        
+        
+        <bean id="task1" class="org.springframework.scheduling.quartz.CronTriggerBean">
+            <property name="jobDetail">
+                <ref bean="checkDailyAccount"/>
+            </property>
+            <!-- cron表达式 -->
+            <property name="cronExpression">
+                <!-- 每隔一段时间执行一次-->
+                <value>00 01 10 * * ?</value>
+            </property>
+        </bean>
+        
+        <bean id="task2" class="org.springframework.scheduling.quartz.CronTriggerBean">
+            <property name="jobDetail">
+                <ref bean="checkDailyCard"/>
+            </property>
+            <!-- cron表达式 -->
+            <property name="cronExpression">
+                <!-- 每隔一段时间执行一次-->
+                <value>0 11 10 * * ?</value>
+            </property>
+        </bean>
+        
+        <bean id="task3" class="org.springframework.scheduling.quartz.CronTriggerBean">
+            <property name="jobDetail">
+                <ref bean="changeUserInfo"/>
+            </property>
+            <!-- cron表达式 -->
+            <property name="cronExpression">
+                <!-- 每隔一段时间执行一次-->
+                <value>0 21 3 * * ?</value>
+            </property>
+        </bean>
+        
+         <bean id="task4" class="org.springframework.scheduling.quartz.CronTriggerBean">
+            <property name="jobDetail">
+                <ref bean="queryConnection"/>
+            </property>
+            <!-- cron表达式 -->
+            <property name="cronExpression">
+                <!-- 每隔10分钟执行一次-->
+                <value>0 0/10 0-23 * * ?</value>
+            </property>
+        </bean>
+        
+        <bean id="task5" class="org.springframework.scheduling.quartz.CronTriggerBean">
+            <property name="jobDetail">
+                <ref bean="queryCheckConnection"/>
+            </property>
+            <!-- cron表达式 -->
+            <property name="cronExpression">
+                <!-- 每隔30分钟执行一次-->
+                <value>0 0/30 0-23 * * ?</value>
+            </property>
+        </bean>
+		
+        <bean lazy-init="false" autowire="no" class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+            <property name="triggers">
+                <list>
+                    <ref bean="task1"/>
+                    <ref bean="task2"/>
+                    <ref bean="task3"/>
+                    <ref bean="task4"/>
+                   	<ref bean="task5"/>
+                </list>
+            </property>
+        </bean>
+</beans>

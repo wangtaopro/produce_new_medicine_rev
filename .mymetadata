@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project-module
+  type="WEB"
+  name="produce_new_medicine_rev"
+  id="myeclipse.1445480080774"
+  context-root="/produce_new_medicine_rev"
+  j2ee-spec="1.4"
+  archive="produce_new_medicine_rev.war">
+  <attributes>
+    <attribute name="webrootdir" value="/WebRoot" />
+  </attributes>
+</project-module>
+

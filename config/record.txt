@@ -1,0 +1,119 @@
+1。数据库中配置SQL脚本
+
+	<1>.配置第三方主要信息
+		insert into litpainfo (TPACODE, NAME, SHORTNAME, TOGETHERFLAG, MANAGECOM, LINKMAN, PHONE, MOBILE, ADDRESS, POSTALCODE, BANKCODE, BANKNAME, BANKACCNO, STANDBYFLAG1, STANDBYFLAG2, STANDBYFLAG3, OPERATOR, MAKEDATE, MAKETIME, MODIFYDATE, MODIFYTIME)
+		values ('22', '仁和国康', 'RHGK', null, null, null, null, null, null, null, null, null, null, null, 'MEDICINE', null, 'tk', to_date('09-07-2012', 'dd-mm-yyyy'), '11:00:26', to_date('09-07-2012', 'dd-mm-yyyy'), '11:00:26');
+	<2>.配置第三方其余信息
+		insert into litpapath (TPACODE, BUSINESSTYPE, IP, USERNAME, PASSWORD, PORT, TPARELPATH, TPAABSPATH, MIDRELPATH, MIDABSPATH, TRANSRELPATH, TRANSABSPATH, EBARELPATH, EBAABSPATH, BACKUPRELPATH, BACKUPABSPATH, STANDBYFLAG1, STANDBYFLAG2, STANDBYFLAG3, OPERATOR, MAKEDATE, MAKETIME, MODIFYDATE, MODIFYTIME)
+		values ('22', 'SFTP', '10.100.10.1', 'TEST', 'TEST', '22', 'D:/test/', 'D:/Avaliable/', null, null, null, null, null, null, null, null, 'TK_GK_MYS_KEY', null, null, 'tk', to_date('03-12-2015', 'dd-mm-yyyy'), '20:12:00', to_date('03-12-2015', 'dd-mm-yyyy'), '20:12:00');
+
+2.配置解读
+	
+		对校验位进行解密
+		
+修改表结构
+		alter table lcmedcarduserinfo drop constraint PK_LCMEDCARDUSERINFO;
+		alter table lcmedcarduserinfo add constraint PK_LCMEDCARDUSERINFO_1 primary key(medcardno ,contno);
+
+
+litpaPath表中字段含义：
+	
+	22	SFTP	10.136.25.37（服务器地址） test（用户名）	test（密码）	22（服务器端口）	
+	D:/test/（文件缓存地址）	D:/Avaliable/（服务器文件地址）bfafa2d07be9464c89dba76a（key）
+	10.136.25.8（第三方地址）
+
+3.直赔主表创建脚本	
+	create table Med_TpaMain 
+	(
+	    BatchNo              VARCHAR2(20)                   not null,
+	    TradeType            char(3) not null,
+	    State                char(1) not null,
+	    SendMessage          CLOB,
+	    AcceptMessage        CLOB,
+	    MakeDate             date not null,
+	    MakeTime             VARCHAR2(8) not null,
+	    ModifyDate           date not null,
+	    ModifyTime           VARCHAR2(8) not null,
+	    MedShopCode          VARCHAR2(20) not null,
+	    Operator             VARCHAR2(20) not null,
+	    TransSumVolume       decimal(12,2),
+	    ForeignBatchNo       VARCHAR2(20) not null,
+	    BatchCount           Number(12),
+	    StandByFlag1         VARCHAR2(20),
+	    StandByFlag2         VARCHAR2(20),
+	    StandByFlag3         VARCHAR2(20),
+	    constraint PK_MED_TPAMAIN primary key (BatchNo)
+	);
+
+4.直赔业务明细表	
+	create table Med_TpaDetail_Business
+	(
+	    BatchNo              VARCHAR2(20)                  	 not null,
+	    TradeType            VARCHAR2(20)                   not null,
+	    ContNo               VARCHAR2(20)                		 not null,
+	    MakeDate             date not null,
+	    MakeTime             VARCHAR2(8) 					 not null,
+	    ModifyDate           date not null,
+	    ModifyTime           VARCHAR2(8)						 not null,
+	    ResultCode           CHAR(1),
+	    ResultMsg            VARCHAR2(100),
+	    Phone                VARCHAR2(11),
+	    MedCardNo            VARCHAR2(20),
+	    State            Char(1),
+	    IDNo                 VARCHAR2(20),
+	    StandByFlag1         VARCHAR2(20),
+	    StandByFlag2         VARCHAR2(20),
+	    StandByFlag3         VARCHAR2(20),
+	    Describe             VARCHAR2(50),
+	    SeqNo                Number(12)							 not null,
+	    insureName 		varchar2(20),
+	    grpName   		varchar2(50),
+	    comName 		varchar2(50),
+	    idType 				varchar2(20),
+	    constraint PK_MED_TPADETAIL_BUSINESS primary key (BatchNo, ContNo)
+	);
+
+5. 修改业务表结构脚本
+	alter table med_tpadetail_business add insureName varchar2(20);--投保人名称
+	alter table med_tpadetail_business add grpName varchar2(20);--投保人单位名称
+	alter table med_tpadetail_business add comName varchar2(20);--公司名称
+	alter table med_tpadetail_business add idType varchar2(20);--证件类型
+		
+
+6.创建LCMedAddressInfoLog表脚本
+	create table LCMedAddressInfoLog 
+	(
+	   SerialNo             VARCHAR2(20)                   not null,
+	   LogSerialNo          VARCHAR2(20)                   not null,
+	   MedCardNo            VARCHAR2(20)                   not null,
+	   TransType            VARCHAR2(2)                    not null,
+	   TKFlag               VARCHAR2(2)                    not null,
+	   TransSerialNo        VARCHAR2(20)                   not null,
+	   SumPrice             NUMBER(12,2)                   not null,
+	   SumClmPrice          NUMBER(12,2)                   not null,
+	   BatchNo              VARCHAR2(40)                   not null,
+	   TransSerialNo7       VARCHAR2(20),
+	   TransSerialNo6       VARCHAR2(20),
+	   TransSerialNo5       VARCHAR2(20),
+	   TransSerialNo4       VARCHAR2(20),
+	   TransSerialNo3       VARCHAR2(20),
+	   Mobile               VARCHAR2(20),
+	   IP                   VARCHAR2(20),
+	   TransSerialNo2       VARCHAR2(20),
+	   TransSerialNo8       VARCHAR2(20),
+	   TransSerialNo9       VARCHAR2(20),
+	   MakeDate             DATE                           not null,
+	   MakeTime             VARCHAR2(20)                   not null,
+	   constraint PK_LCMEDADDRESSINFOLOG primary key (SerialNo)
+	);
+
+
+7。生产数据库用户名，密码
+	 username="F94D27CDDCDB5132" --  lis
+     password="865C629F439A1E61"  --  tk3z5l9s
+
+
+系统架构：
+		spring + mybatis + mina + quartz 
+		
+
